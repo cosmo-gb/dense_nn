@@ -53,9 +53,20 @@ if __name__ == '__main__':
     
     
     #%%
-    # data from mchine learnia
+    #############################################################################
+    ################## CAT and NO CAT pictures ###################################
+    #############################################################################
+    # data from machine learnia
     from utilities import load_data
     X_train, y_train, X_test, y_test = load_data()
+    
+    #%%
+    cat_str = ['cat', 'no cat']
+    for i in range(9): 
+        plt.subplot(330 + 1 + i)
+        plt.imshow(X_train[i], cmap=plt.get_cmap('gray'))
+        plt.title(cat_str[int(y_train[i])])
+        plt.show()
     
     #%%
     # reorganize train and test set: dog vs cat picture
@@ -65,14 +76,20 @@ if __name__ == '__main__':
     y_train_reshape = y_train.reshape(1, y_train.shape[0]).astype(int)
     X_test_reshape = X_test.reshape(X_test.shape[0], X_test.shape[1] * X_test.shape[2]).T
     y_test_reshape = y_test.reshape(1, y_test.shape[0]).astype(int)
+    print(X_train_reshape.shape)
+    print(X_test_reshape.shape)
+    print(y_train_reshape.shape)
+    print(y_test_reshape.shape)
     
     #%%
     # train model
     my_layer = FC()
-    my_layer.n_iter = 3000
-    my_layer.stop_th = 100
-    hidden_layers = np.array([32, 32, 32, 32])
-    parameters = my_layer.train_nn(X_train_reshape/X_train_reshape.max(), y_train_reshape,
+    my_layer.n_epochs = 300
+    my_layer.stop_th = 20
+    my_layer.verbose = 5
+    hidden_layers = np.array([16, 16, 16, 16, 16])
+    print(X_train_reshape.shape)
+    parameters, measure = my_layer.train_nn(X_train_reshape/X_train_reshape.max(), y_train_reshape,
                                    hidden_layers,
                                    X_test_reshape/X_train_reshape.max(), y_test_reshape)
     
