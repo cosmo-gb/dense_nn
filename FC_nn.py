@@ -7,6 +7,7 @@ Created on Mon Apr 10 12:34:16 2023
 
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 class my_metrics :
     
@@ -23,7 +24,7 @@ class FC(my_metrics) :
         self.n_epochs = 100 
         self.stop_th = 10 # early_stopping: training stops when loss does not improve for stop_th epochs in a row
         self.verbose = 1 # number of epoch you want to print the loss and accuracy
-        #self.batch_size = 32 # size of the minibatch
+        self.batch_size = 32 # size of the minibatch
         
     def initialization(self, dimensions: np.ndarray) -> dict:
         '''
@@ -181,6 +182,22 @@ class FC(my_metrics) :
             stop = 0
         return stop
                 
+    def set_batch(self, N_samples: int, batch_size: int):
+        '''
+        this function builds the indices in order to generate the minibatches
+        Parameters
+        ----------
+        N_samples : int, total number of samples in train
+        batch_size : int, size of batch i.e. number of samples inside 1 batch
+        Returns
+        -------
+        ind : indices of samples disordered
+        N_batch : int, number of batches
+        '''
+        N_batch = N_samples // batch_size
+        ind = random.sample(range(N_samples),N_samples)
+        return ind, N_batch
+    
     def train_nn(self, X: np.ndarray, y: np.ndarray, hidden_layers: np.ndarray, 
                  X_test: np.ndarray, y_test: np.ndarray):
         '''
@@ -213,25 +230,27 @@ class FC(my_metrics) :
         test_loss, test_acc = [], []
         stop = 0 # initialize early stopping
         for i in range(self.n_epochs): # loop on the number of epochs
-            activations = self.forward_propagation(X, parameters) # forward propagates
-            gradients = self.back_propagation(y, activations, parameters) # computes the gradients
-            parameters = self.update(gradients, parameters) # updates the weights and biaises
+            # reorder the data after each epoch
+            ind, N_batch = self.set_batch(self.N_samples_train, self.batch_size)
+            for b in range(N_batch): # loop on the batches
+                # indices of the samples of the batch b
+                ind_b = ind[b*self.batch_size:(b+1)*self.batch_size]
+                activations = self.forward_propagation(X[:,ind_b], parameters) # forward propagates
+                gradients = self.back_propagation(y[:,ind_b], activations, parameters) # computes the gradients
+                parameters = self.update(gradients, parameters) # updates the weights and biaises
             # train save results
             # loss
-            #train_loss.append(log_loss(y, activations['A' + str(self.N_layers)])/self.N_samples_train)
+            activations = self.forward_propagation(X, parameters) # forward propagates
             train_loss.append(self.my_log_loss(y.flatten(), activations['A' + str(self.N_layers)].flatten()))
-            y_pred = self.predict(X, parameters)
             # accuracy
-            #train_acc.append(accuracy_score(y.flatten(), y_pred.flatten()))
+            y_pred = self.predict(X, parameters)
             train_acc.append(self.my_accuracy_score(y.flatten(), y_pred.flatten()))
             # test save results
             # loss
             activations_test = self.forward_propagation(X_test, parameters)
-            #test_loss.append(log_loss(y_test, activations_test['A' + str(self.N_layers)])/self.N_samples_test)
             test_loss.append(self.my_log_loss(y_test.flatten(), activations_test['A' + str(self.N_layers)].flatten()))
             # accuracy
             y_pred_test = self.predict(X_test, parameters)
-            #test_acc.append(accuracy_score(y_test.flatten(), y_pred_test.flatten()))
             test_acc.append(self.my_accuracy_score(y_test.flatten(), y_pred_test.flatten()))
             # early stopping
             if i > 1 :
@@ -241,15 +260,19 @@ class FC(my_metrics) :
             # print loss, accuracy epochs every verbose epoch
             if i % self.verbose == 0:
                 print('epoch = ', i,', ',
-                      'test_loss = {:.3f}'.format(test_loss[i]),', ',
-                      'test_acc = {:.3f}'.format(test_acc[i]))
+                      'test_loss = {:.5f}'.format(test_loss[i]),', ',
+                      'test_acc = {:.5f}'.format(test_acc[i]))
         # visualisation: plot of loss and accuracy for train and test
         fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(3, 3))
         ax[0].plot(train_loss, c='b', label='loss train')
         ax[0].plot(test_loss, c='r', label='loss test')
+        ax[0].set_xlabel('epoch')
+        ax[0].set_ylabel('loss')
         ax[0].legend()
         ax[1].plot(train_acc, c='b', label='acc train')
         ax[1].plot(test_acc, c='r', label='acc test')
+        ax[1].set_xlabel('epoch')
+        ax[1].set_ylabel('accuracy')
         ax[1].legend()
         plt.show()
         # set metrics in a dictionnary

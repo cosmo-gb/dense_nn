@@ -83,7 +83,7 @@ if __name__ == '__main__':
     ####################### MNIST #############################################
     ###########################################################################
     (train_X, train_y), (test_X, test_y) = mnist.load_data()
-    for i in range(3): 
+    for i in range(0): 
         plt.subplot(330 + 1 + i)
         plt.imshow(train_X[i], cmap=plt.get_cmap('gray'))
         plt.show()
@@ -115,10 +115,10 @@ if __name__ == '__main__':
     hidden_layers = np.array([32, 32])
     my_layer = FC()
     my_layer.n_epochs = 3
-    my_layer.stop_th = 10
-    my_layer.verbose = 3
+    my_layer.stop_th = 5
+    my_layer.verbose = 1
     print(y_train.shape)
     parameters, measure = my_layer.train_nn(train_X_reshape/255, y_train, 
                                    hidden_layers,
                                    test_X_reshape/255, y_test)
-    print(parameters['W2'][0:2,0:2])
+    
