@@ -254,7 +254,8 @@ class FC(my_metrics) :
             test_acc.append(self.my_accuracy_score(y_test.flatten(), y_pred_test.flatten()))
             # early stopping
             if i > 1 :
-                stop = self.early_stop_inf(test_acc, stop)
+                #stop = self.early_stop_inf(test_acc, stop)
+                stop = self.early_stop_sup(test_loss, stop)
                 if stop > self.stop_th :
                     break
             # print loss, accuracy epochs every verbose epoch
