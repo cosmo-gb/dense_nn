@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from keras.datasets import mnist
 from sklearn.datasets import make_circles
 from FC_nn import FC
+import h5py
 
 
 if __name__ == '__main__':
@@ -57,7 +58,17 @@ if __name__ == '__main__':
     ################## CAT and NO CAT pictures ###################################
     #############################################################################
     # data from machine learnia
-    from utilities import load_data
+    #from utilities import load_data
+    def load_data():
+        train_dataset = h5py.File('datasets/trainset.hdf5', "r")
+        X_train = np.array(train_dataset["X_train"][:]) # your train set features
+        y_train = np.array(train_dataset["Y_train"][:]) # your train set labels
+    
+        test_dataset = h5py.File('datasets/testset.hdf5', "r")
+        X_test = np.array(test_dataset["X_test"][:]) # your train set features
+        y_test = np.array(test_dataset["Y_test"][:]) # your train set labels
+        
+        return X_train, y_train, X_test, y_test
     X_train, y_train, X_test, y_test = load_data()
     
     #%%
