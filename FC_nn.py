@@ -20,10 +20,10 @@ class my_metrics :
 class FC(my_metrics) :
     
     def __init__(self):
-        self.learning_rate = 0.01
-        self.n_epochs = 100 
+        self.learning_rate = 0.01 # rate of evolution of weights: w -> w - learning_rate * dw
+        self.n_epochs = 100 # maximum number of epochs
         self.stop_th = 10 # early_stopping: training stops when loss does not improve for stop_th epochs in a row
-        self.verbose = 1 # number of epoch you want to print the loss and accuracy
+        self.verbose = 1 # print the loss and accuracy each verbose epochs
         self.batch_size = 32 # size of the minibatch
         
     def initialization(self, dimensions: np.ndarray) -> dict:
@@ -44,9 +44,14 @@ class FC(my_metrics) :
                     Thus it contains the values of the weight and biaises parameters
         '''
         parameters = {}
+        N_weights, N_biaises = 0, 0
         for l in range(1, self.N_layers+1) : # loop on the number of layers
             parameters['W' + str(l)] = np.random.randn(dimensions[l], dimensions[l - 1])
+            N_weights += dimensions[l] * dimensions[l - 1]
             parameters['b' + str(l)] = np.random.randn(dimensions[l], 1)
+            N_biaises += dimensions[l] * 1
+        parameters['N_weights'] = N_weights
+        parameters['N_biaises'] = N_biaises
         return parameters
     
     def forward_propagation(self, X: np.ndarray, parameters: dict) -> dict:
@@ -232,6 +237,10 @@ class FC(my_metrics) :
         for i in range(self.n_epochs): # loop on the number of epochs
             # reorder the data after each epoch
             ind, N_batch = self.set_batch(self.N_samples_train, self.batch_size)
+            if i == 0:
+                print('N_batch = ', N_batch, ', ',
+                      'N_weights = ',parameters['N_weights'], ', ',
+                      'N_biaises = ',parameters['N_biaises'])
             for b in range(N_batch): # loop on the batches
                 # indices of the samples of the batch b
                 ind_b = ind[b*self.batch_size:(b+1)*self.batch_size]
@@ -263,19 +272,6 @@ class FC(my_metrics) :
                 print('epoch = ', i,', ',
                       'test_loss = {:.5f}'.format(test_loss[i]),', ',
                       'test_acc = {:.5f}'.format(test_acc[i]))
-        # visualisation: plot of loss and accuracy for train and test
-        fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(3, 3))
-        ax[0].plot(train_loss, c='b', label='loss train')
-        ax[0].plot(test_loss, c='r', label='loss test')
-        ax[0].set_xlabel('epoch')
-        ax[0].set_ylabel('loss')
-        ax[0].legend()
-        ax[1].plot(train_acc, c='b', label='acc train')
-        ax[1].plot(test_acc, c='r', label='acc test')
-        ax[1].set_xlabel('epoch')
-        ax[1].set_ylabel('accuracy')
-        ax[1].legend()
-        plt.show()
         # set metrics in a dictionnary
         measure = {'train_loss': train_loss, 'train_acc': train_acc,
                    'test_loss': test_loss, 'test_acc': test_acc}
