@@ -23,8 +23,8 @@ class FC(my_metrics) :
         self.learning_rate = 0.01 # rate of evolution of weights: w -> w - learning_rate * dw
         self.n_epochs = 100 # maximum number of epochs
         self.stop_th = 10 # early_stopping: training stops when loss does not improve for stop_th epochs in a row
-        self.verbose = 1 # print the loss and accuracy each verbose epochs
         self.batch_size = 32 # size of the minibatch
+        self.verbose = 1 # print the loss and accuracy each verbose epochs
         
     def initialization(self, dimensions: np.ndarray) -> dict:
         '''
@@ -219,6 +219,7 @@ class FC(my_metrics) :
         parameters: dict, weight and biaises parameters of the trained network
         measure: dict, loss and accuracy for the train and test set at all epochs
         '''        
+        assert self.n_epochs > self.stop_th, "The number of epochs n_epochs must be larger or equal \n than the patience stop_th."
         np.random.seed(0) # fix the randomness of the initialization
         # add the dimension of the problem as the first element of dimensions,
         # e.g. if each sample s in a 2 dimensional vector then X.shape[0] = 2
