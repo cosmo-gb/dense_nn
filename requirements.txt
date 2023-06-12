@@ -1,5 +1,5 @@
-markdown==
-numpy==1.24.3
+python==3.8.13
+markdown==3.4.1
+numpy==1.23.5
 matplotlib==3.6.2
-random==
 tensorflow==2.10.0
